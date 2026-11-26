@@ -54,6 +54,44 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+    
+<h2>Artist Registration</h2>
+
+<form id="signup-form">
+  <label for="artist-name">Artist or stage name</label>
+  <input id="artist-name" type="text" required
+         placeholder="Enter your artist name">
+
+  <label for="signup-email">Email address</label>
+  <input id="signup-email" type="email" required
+         placeholder="Enter your email">
+
+  <label for="signup-password">Password</label>
+  <input id="signup-password" type="password"
+         minlength="6" required
+         placeholder="Create a password">
+
+  <button type="submit">Register as Artist</button>
+</form>
+
+<hr>
+
+<h2>Artist Sign In</h2>
+
+<form id="login-form">
+  <label for="login-email">Email address</label>
+  <input id="login-email" type="email" required
+         placeholder="Enter your email">
+
+  <label for="login-password">Password</label>
+  <input id="login-password" type="password" required
+         placeholder="Enter your password">
+
+  <button type="submit">Sign In</button>
+</form>
+
+<p id="artist-status">Welcome to Shopora Music!</p>
+  
   </script>
 </body>
 </html>
