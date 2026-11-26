@@ -42,16 +42,6 @@
 
     <h2>Welcome, Artists!</h2>
     <p>Register, upload your music, and share your sound with the world.</p>
-  </div>
-  <script>
-const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
-
-const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
 
     
     
@@ -91,7 +81,19 @@ const supabaseClient = window.supabase.createClient(
 </form>
 
 <p id="artist-status">Welcome to Shopora Music!</p>
+    
+  </div>
+  <script>
+const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
 
+const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+    
     
 const artistStatus = document.getElementById("artist-status");
 
