@@ -148,13 +148,20 @@
             .eq("user_id", data.user.id)
             .maybeSingle();
 
-        if (adminError || !admin) {
-          await supabaseClient.auth.signOut();
-          statusBox.textContent =
-            "Access denied. This account is not an authorized administrator.";
-          return;
-        }
+if (adminError) {
+  await supabaseClient.auth.signOut();
+  statusBox.textContent =
+    "Administrator check error: " + adminError.message;
+  return;
+}
 
+if (!admin) {
+  await supabaseClient.auth.signOut();
+  statusBox.textContent =
+    "No administrator record was found for this signed-in account.";
+  return;
+}
+        
         document.getElementById("login").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
 
