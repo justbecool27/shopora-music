@@ -81,6 +81,54 @@
 </form>
 
 <p id="artist-status">Welcome to Shopora Music!</p>
+
+    
+<hr>
+
+<h2>Upload Your Music</h2>
+<p>Share your music with Shopora Music listeners.</p>
+
+<form id="upload-form">
+
+  <label for="song-title">Song Title</label>
+  <input
+    type="text"
+    id="song-title"
+    required
+    placeholder="Enter song title"
+  >
+
+  <label for="song-genre">Music Genre</label>
+  <select id="song-genre" required>
+    <option value="">Choose a genre</option>
+    <option value="Afrobeats">Afrobeats</option>
+    <option value="Gospel">Gospel</option>
+    <option value="Hip-hop">Hip-hop</option>
+    <option value="R&B">R&B</option>
+    <option value="Reggae">Reggae</option>
+    <option value="Pop">Pop</option>
+    <option value="Dancehall">Dancehall</option>
+    <option value="Traditional">Traditional</option>
+  </select>
+
+  <label for="song-description">Song Description</label>
+  <textarea
+    id="song-description"
+    placeholder="Tell listeners about your song"
+  ></textarea>
+
+  <label for="song-file">Select Audio File</label>
+  <input
+    type="file"
+    id="song-file"
+    accept="audio/*"
+    required
+  >
+
+  <button type="submit">Submit Music</button>
+
+</form>
+    
     
   </div>
   <script>
