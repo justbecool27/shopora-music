@@ -1,1 +1,236 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#100d1c">
+  <title>Shopora Music | Discover Your Sound</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #100d1c;
+      color: white;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 18px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #191428;
+      border-bottom: 1px solid #302743;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+      color: #f4c75e;
+    }
+
+    nav { display: flex; gap: 20px; flex-wrap: wrap; }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    nav a:hover { color: #f4c75e; }
+
+    .hero {
+      padding: 75px 6%;
+      text-align: center;
+      background: linear-gradient(135deg, #24143d, #111020);
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 7vw, 58px);
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 span { color: #f4c75e; }
+
+    .hero p {
+      color: #c9c3d5;
+      margin-bottom: 28px;
+    }
+
+    .search {
+      display: flex;
+      max-width: 520px;
+      margin: auto;
+      gap: 8px;
+    }
+
+    .search input {
+      flex: 1;
+      min-width: 0;
+      padding: 15px;
+      border-radius: 9px;
+      border: 1px solid #514267;
+      background: #211a30;
+      color: white;
+      font-size: 15px;
+    }
+
+    button, .button {
+      border: 0;
+      border-radius: 9px;
+      padding: 13px 20px;
+      background: #f4c75e;
+      color: #171020;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .section { padding: 45px 6%; }
+
+    .section h2 {
+      font-size: 25px;
+      margin-bottom: 20px;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 14px;
+    }
+
+    .category {
+      background: #211a30;
+      padding: 22px 12px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid #352a48;
+      font-weight: bold;
+    }
+
+    .category span {
+      display: block;
+      font-size: 27px;
+      margin-bottom: 7px;
+    }
+
+    .empty {
+      background: #211a30;
+      padding: 35px 15px;
+      text-align: center;
+      border-radius: 12px;
+      color: #c9c3d5;
+      border: 1px solid #352a48;
+    }
+
+    .artist {
+      margin: 15px 6% 50px;
+      padding: 35px 20px;
+      text-align: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #35204c, #201a32);
+    }
+
+    .artist h2 { margin-bottom: 10px; }
+
+    .artist p {
+      color: #d1c8df;
+      margin-bottom: 20px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #191428;
+      color: #aaa2b8;
+      font-size: 13px;
+    }
+
+    @media(max-width: 500px) {
+      header { justify-content: center; }
+      nav { justify-content: center; }
+      .search { flex-direction: column; }
+      .search button { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">♫ Shopora Music</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#music">Music</a>
+    <a href="#categories">Categories</a>
+    <a href="#artists">Artists</a>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <h1>Discover Your <span>Sound.</span></h1>
+  <p>Stream, discover and download music from talented artists.</p>
+
+  <form class="search" id="search-form">
+    <input id="search-input" type="search"
+      placeholder="Search songs or artists...">
+    <button type="submit">Search</button>
+  </form>
+</section>
+
+<section class="section" id="music">
+  <h2>♫ Latest Releases</h2>
+  <div class="empty" id="song-list">
+    <p>🎵</p>
+    <h3>Welcome to Shopora Music</h3>
+    <p>New music releases will appear here.</p>
+  </div>
+</section>
+
+<section class="section" id="categories">
+  <h2>Explore Music</h2>
+
+  <div class="categories">
+    <div class="category"><span>🎤</span>Afrobeats</div>
+    <div class="category"><span>🎧</span>Hip Hop</div>
+    <div class="category"><span>💃</span>Gospel</div>
+    <div class="category"><span>🎸</span>R&B</div>
+    <div class="category"><span>🥁</span>Reggae</div>
+    <div class="category"><span>🎼</span>Other Music</div>
+  </div>
+</section>
+
+<section class="artist" id="artists">
+  <h2>Are You a Music Artist?</h2>
+  <p>Join Shopora Music and share your music with the world.</p>
+  <a class="button" href="artist.html">Artist Registration</a>
+</section>
+
+<footer>
+  <p>© 2026 Shopora Music. All rights reserved.</p>
+  <p>Discover Your Sound.</p>
+</footer>
+
+<script>
+  document.getElementById("search-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const query = document.getElementById("search-input").value.trim();
+
+    if (!query) {
+      alert("Please enter a song or artist name.");
+      return;
+    }
+
+    alert("Music search will be connected to the Shopora Music database next.");
+  });
+</script>
+
+</body>
+</html>
