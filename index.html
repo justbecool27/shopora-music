@@ -279,7 +279,98 @@
   <p>Discover Your Sound.</p>
 </footer>
 
-<script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+    
+async function loadShoporaSongs() {
+  const songList = document.getElementById("song-list");
+
+  songList.textContent = "Loading approved songs...";
+
+  const { data: songs, error } = await supabaseClient
+    .from("songs")
+    .select(`
+      id,
+      title,
+      description,
+      genre,
+      storage_path,
+      cover_path,
+      created_at,
+      artist:artists(display_name)
+    `)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    songList.textContent = "Unable to load music. Please try again.";
+    console.error(error);
+    return;
+  }
+
+  songList.replaceChildren();
+
+  if (!songs || songs.length === 0) {
+    songList.textContent = "No approved songs are available yet.";
+    return;
+  }
+
+  for (const song of songs) {
+    const card = document.createElement("div");
+    card.className = "song-card";
+
+    const title = document.createElement("h3");
+    title.textContent = song.title;
+
+    const artist = document.createElement("p");
+    artist.textContent =
+      song.artist?.display_name || "Shopora Music Artist";
+
+    const genre = document.createElement("p");
+    genre.textContent = song.genre || "Music";
+
+    card.append(title, artist, genre);
+
+    const { data: audio, error: audioError } =
+      await supabaseClient.storage
+        .from("shopora-music")
+        .createSignedUrl(song.storage_path, 3600);
+
+    if (audioError) {
+      console.error(audioError);
+    } else {
+      const player = document.createElement("audio");
+      player.controls = true;
+      player.preload = "none";
+      player.src = audio.signedUrl;
+      card.appendChild(player);
+
+      const download = document.createElement("a");
+      download.href = audio.signedUrl;
+      download.download = song.title + ".mp3";
+      download.textContent = "Download Song";
+      card.appendChild(download);
+    }
+
+    songList.appendChild(card);
+  }
+}
+
+loadShoporaSongs();
+    
+  
+  
   document.getElementById("search-form").addEventListener("submit", function(e) {
     e.preventDefault();
     const query = document.getElementById("search-input").value.trim();
