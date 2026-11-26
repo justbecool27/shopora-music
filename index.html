@@ -173,6 +173,35 @@
   max-height: 420px;
   object-fit: cover;
 }
+    
+.search-box {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #f4c75e;
+  border-radius: 10px;
+  background: #211c2d;
+  color: white;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.song-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 25px;
+}
+
+.song-grid .empty {
+  text-align: center;
+  padding: 25px;
+}
+    
   </style>
 </head>
 
@@ -200,12 +229,25 @@
 </section>
 
 <section class="section" id="music">
-  <h2>♫ Latest Releases</h2>
-  <div class="empty" id="song-list">
+
+<h2>♫ Latest Releases</h2>
+
+<div class="search-box">
+  <input
+    type="search"
+    id="song-search"
+    placeholder="Search songs or artists..."
+  >
+</div>
+
+<div id="song-list" class="song-grid">
+  <div class="empty">
     <p>🎵</p>
     <h3>Welcome to Shopora Music</h3>
-    <p>New music releases will appear here.</p>
+    <p>Loading music library...</p>
   </div>
+</div>
+  
 
   <div class="hero-banner">
   <img src="shopora-music-banner.jpg"
