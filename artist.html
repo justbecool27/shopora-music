@@ -688,6 +688,40 @@ if (coverFile) {
         return;
       }
 
+      
+      let coverStoragePath = null;
+
+      if (coverFile) {
+        const safeCoverName = coverFile.name
+          .split("/")
+          .pop()
+          .replace(/[^a-zA-Z0-9._-]/g, "-");
+
+        coverStoragePath =
+          user.id + "/covers/" + Date.now() + "-" + safeCoverName;
+
+        artistStatus.textContent = "Uploading song cover...";
+
+        const { error: coverUploadError } = await supabaseClient
+          .storage
+          .from("shopora-music")
+          .upload(coverStoragePath, coverFile, {
+            contentType: coverFile.type,
+            upsert: false
+          });
+
+        if (coverUploadError) {
+          await supabaseClient.storage
+            .from("shopora-music")
+            .remove([storagePath]);
+
+          artistStatus.textContent =
+            "Cover upload failed: " + coverUploadError.message;
+          return;
+        }
+      }
+
+
       const { error: songError } = await supabaseClient
         .from("songs")
         .insert({
