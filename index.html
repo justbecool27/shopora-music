@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +15,6 @@
       color: white;
       line-height: 1.6;
     }
-
     header {
       padding: 18px 6%;
       display: flex;
@@ -43,7 +41,6 @@
     }
 
     nav a:hover { color: #f4c75e; }
-
     .hero {
       padding: 75px 6%;
       text-align: center;
@@ -69,7 +66,6 @@
       margin: auto;
       gap: 8px;
     }
-
     .search input {
       flex: 1;
       min-width: 0;
@@ -94,7 +90,6 @@
     }
 
     .section { padding: 45px 6%; }
-
     .section h2 {
       font-size: 25px;
       margin-bottom: 20px;
@@ -121,7 +116,6 @@
       background: #f4c75e;
       color: #171020;
     }
-
     .empty {
       background: #211a30;
       padding: 35px 15px;
@@ -145,7 +139,6 @@
       color: #d1c8df;
       margin-bottom: 20px;
     }
-
     footer {
       text-align: center;
       padding: 25px;
@@ -168,7 +161,6 @@
       border-radius: 18px;
       overflow: hidden;
     }
-
     .hero-banner img {
       display: block;
       width: 100%;
@@ -191,7 +183,6 @@
       color: white;
       font-size: 16px;
     }
-
     .song-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -216,7 +207,6 @@
       color: #c9c3d5;
       margin-bottom: 8px;
     }
-
     .song-card audio {
       width: 100%;
       margin: 12px 0;
@@ -241,7 +231,6 @@
       gap: 10px;
       margin: 10px 0;
     }
-
     .song-artist-avatar {
       width: 42px;
       height: 42px;
@@ -251,7 +240,6 @@
       border: 2px solid #f4c75e;
       flex-shrink: 0;
     }
-
     .song-artist-placeholder {
       width: 42px;
       height: 42px;
@@ -273,7 +261,33 @@
       margin: 0 !important;
     }
 
-    /* Top Artists */
+    /* Make the artist picture and name clickable */
+    .song-artist-link {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .song-artist-link:hover .song-artist-name {
+      color: #f4c75e;
+      text-decoration: underline;
+    }
+
+    .song-artist-link:focus-visible {
+      outline: 2px solid #f4c75e;
+      outline-offset: 4px;
+    }
+
+        /* Top Artists */
     .artist-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -400,7 +414,6 @@
 </head>
 
 <body>
-
 <header>
   <div class="logo">♫ Shopora Music</div>
   <nav>
@@ -417,7 +430,6 @@
 <section class="hero" id="home">
   <h1>Discover Your <span>Sound.</span></h1>
   <p>Stream, discover and download music from talented artists.</p>
-
   <form class="search" id="search-form">
     <input id="search-input" type="search"
       placeholder="Search songs or artists...">
@@ -535,7 +547,6 @@
 
 <script>
 const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
-
 const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
 
 const supabaseClient = window.supabase.createClient(
@@ -543,7 +554,7 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 
-let allApprovedSongs = [];
+  let allApprovedSongs = [];
 let allTopArtists = [];
 let activeGenre = "";
 
@@ -552,7 +563,6 @@ async function loadShoporaSongs() {
   const songList = document.getElementById("song-list");
 
   songList.textContent = "Loading approved songs...";
-
   const { data: songs, error } = await supabaseClient
     .from("songs")
     .select(`
@@ -604,8 +614,16 @@ function createSongCard(song) {
   title.textContent = song.title;
 
   // Artist picture and name.
-  const artistRow = document.createElement("div");
-  artistRow.className = "song-artist-row";
+  const artistRow = document.createElement(
+    song.artist_id ? "button" : "div"
+  );
+
+  if (song.artist_id) {
+    artistRow.type = "button";
+    artistRow.className = "song-artist-row song-artist-link";
+  } else {
+    artistRow.className = "song-artist-row";
+  }
 
   const artistName =
     song.artist?.display_name || "Shopora Music Artist";
@@ -637,6 +655,24 @@ function createSongCard(song) {
   artist.textContent = artistName;
 
   artistRow.appendChild(artist);
+
+  // Open artist profile when the picture or name is clicked.
+  if (song.artist_id) {
+    artistRow.addEventListener("click", function() {
+      const cachedArtist = allTopArtists.find(
+        item => item.artist_id === song.artist_id
+      );
+
+      openArtistProfile(
+        song.artist_id,
+        cachedArtist || {
+          artist_id: song.artist_id,
+          display_name: artistName,
+          avatar_url: song.artist?.avatar_url || null
+        }
+      );
+    });
+  }
 
   const genre = document.createElement("p");
   genre.textContent = song.genre || "Music";
@@ -833,64 +869,50 @@ function displayPopularSongs() {
   );
 }
 
-// Load Top Artists from Supabase.
+  // Load the top artists.
 async function loadTopArtists() {
   const container = document.getElementById("top-artist-list");
 
   if (!container) return;
 
-  const { data: artists, error } = await supabaseClient.rpc(
+  const { data, error } = await supabaseClient.rpc(
     "get_top_artists"
   );
 
   if (error) {
-    console.error("Top Artists loading error:", error);
-
-    container.replaceChildren();
-
-    const message = document.createElement("div");
-    message.className = "empty";
-    message.textContent =
-      "Unable to load Top Artists. Please check the database permissions.";
-
-    container.appendChild(message);
+    console.error("Could not load top artists:", error);
+    container.textContent = "Unable to load top artists.";
     return;
   }
 
-  allTopArtists = artists || [];
+  allTopArtists = data || [];
   container.replaceChildren();
 
   if (allTopArtists.length === 0) {
-    const message = document.createElement("div");
-    message.className = "empty";
-    message.textContent =
-      "No artists with approved songs are available yet.";
-
-    container.appendChild(message);
+    container.textContent = "No artists are available yet.";
     return;
   }
 
-  allTopArtists.forEach((artist, index) => {
+  allTopArtists.forEach(artist => {
     const card = document.createElement("div");
     card.className = "top-artist-card";
 
     if (artist.avatar_url) {
-      const avatar = document.createElement("img");
-      avatar.className = "artist-avatar";
-      avatar.src = artist.avatar_url;
-      avatar.alt = artist.display_name + " profile picture";
-      avatar.loading = "lazy";
+      const image = document.createElement("img");
+      image.className = "artist-avatar";
+      image.src = artist.avatar_url;
+      image.alt = artist.display_name + " profile picture";
+      image.loading = "lazy";
 
-      avatar.onerror = function() {
+      image.onerror = function() {
         const placeholder = document.createElement("div");
         placeholder.className = "artist-placeholder";
         placeholder.textContent =
           (artist.display_name || "A").charAt(0).toUpperCase();
-
-        avatar.replaceWith(placeholder);
+        image.replaceWith(placeholder);
       };
 
-      card.appendChild(avatar);
+      card.appendChild(image);
     } else {
       const placeholder = document.createElement("div");
       placeholder.className = "artist-placeholder";
@@ -901,21 +923,22 @@ async function loadTopArtists() {
     }
 
     const name = document.createElement("h3");
-    name.textContent =
-      (index + 1) + ". " + (artist.display_name || "Shopora Artist");
+    name.textContent = artist.display_name || "Unknown Artist";
 
     const bio = document.createElement("p");
-    bio.textContent = artist.bio || "Shopora Music Artist";
+    bio.textContent =
+      artist.bio || "This artist has not added a biography yet.";
 
     const plays = document.createElement("p");
     plays.className = "artist-plays";
     plays.textContent =
-      "▶ " + Number(artist.total_plays || 0).toLocaleString() + " total plays";
+      "▶ " + Number(artist.total_plays || 0).toLocaleString() +
+      " total plays";
 
     const viewButton = document.createElement("button");
     viewButton.type = "button";
-    viewButton.className = "artist-profile-button";
     viewButton.textContent = "View Artist Profile";
+    viewButton.className = "artist-profile-button";
 
     viewButton.addEventListener("click", function() {
       openArtistProfile(artist.artist_id, artist);
@@ -929,175 +952,218 @@ async function loadTopArtists() {
 // Open an artist's profile.
 async function openArtistProfile(artistId, artistData = null) {
   const profileSection = document.getElementById("artist-profile");
-  const pictureContainer = document.getElementById("profile-picture-container");
+  const pictureContainer =
+    document.getElementById("profile-picture-container");
   const profileName = document.getElementById("profile-name");
   const profileBio = document.getElementById("profile-bio");
-  const profilePlays = document.getElementById("profile-total-plays");
-  const songsContainer = document.getElementById("artist-profile-songs");
+  const profilePlays =
+    document.getElementById("profile-total-plays");
+  const songsContainer =
+    document.getElementById("artist-profile-songs");
 
-  if (!artistId) {
-    alert("Artist information is not available.");
-    return;
-  }
+  if (!artistId) return;
 
   profileSection.style.display = "block";
-  profileSection.scrollIntoView({ behavior: "smooth" });
-
   pictureContainer.replaceChildren();
   profileName.textContent = "Loading artist...";
   profileBio.textContent = "";
   profilePlays.textContent = "";
-  songsContainer.innerHTML = '<div class="empty">Loading artist songs...</div>';
+  songsContainer.textContent = "Loading artist songs...";
 
-  let artist = artistData;
+  profileSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 
-  if (!artist || !artist.display_name) {
-    const { data, error } = await supabaseClient
-      .from("artists")
-      .select("id, display_name, bio, avatar_url")
-      .eq("id", artistId)
-      .maybeSingle();
+  const { data: artist, error } = await supabaseClient
+    .from("artists")
+    .select("id, display_name, bio, avatar_url")
+    .eq("id", artistId)
+    .single();
 
-    if (error) {
-      console.error("Artist profile loading error:", error);
+  if (error) {
+    console.error("Could not load artist profile:", error);
+
+    if (!artistData) {
+      profileName.textContent = "Artist profile unavailable.";
+      songsContainer.textContent = "Unable to load artist songs.";
+      return;
     }
-
-    artist = data || artist || {};
   }
 
-  profileName.textContent =
-    artist.display_name || "Shopora Music Artist";
+  const profile = artist || artistData || {};
+  const displayName = profile.display_name || "Unknown Artist";
 
+  profileName.textContent = displayName;
   profileBio.textContent =
-    artist.bio || "This artist has not added a biography yet.";
+    profile.bio || "This artist has not added a biography yet.";
 
-  const artistSongs = allApprovedSongs.filter(
-    song => song.artist_id === artistId
-  );
+  if (profile.avatar_url) {
+    const image = document.createElement("img");
+    image.className = "profile-avatar";
+    image.src = profile.avatar_url;
+    image.alt = displayName + " profile picture";
 
-  const totalPlays = artistSongs.reduce(
-    (total, song) => total + Number(song.play_count || 0),
-    0
-  );
+    image.onerror = function() {
+      const placeholder = document.createElement("div");
+      placeholder.className = "profile-placeholder";
+      placeholder.textContent = displayName.charAt(0).toUpperCase();
+      image.replaceWith(placeholder);
+    };
+
+    pictureContainer.appendChild(image);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "profile-placeholder";
+    placeholder.textContent = displayName.charAt(0).toUpperCase();
+    pictureContainer.appendChild(placeholder);
+  }
+
+  const { data: artistSongs, error: songsError } =
+    await supabaseClient
+      .from("songs")
+      .select(`
+        id,
+        title,
+        description,
+        genre,
+        storage_path,
+        cover_path,
+        created_at,
+        play_count,
+        artist_id,
+        artist:artists(display_name, avatar_url)
+      `)
+      .eq("artist_id", artistId)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+
+  if (songsError) {
+    console.error("Could not load artist songs:", songsError);
+    songsContainer.textContent = "Unable to load this artist's songs.";
+    return;
+  }
+
+  const profileSongList = artistSongs || [];
+
+  let totalPlays = 0;
+
+  profileSongList.forEach(song => {
+    totalPlays += Number(song.play_count || 0);
+  });
 
   profilePlays.textContent =
     "▶ " + totalPlays.toLocaleString() + " total plays";
 
-  if (artist.avatar_url) {
-    const avatar = document.createElement("img");
-    avatar.className = "profile-avatar";
-    avatar.src = artist.avatar_url;
-    avatar.alt = profileName.textContent + " profile picture";
+  for (const song of profileSongList) {
+    const { data: audio, error: audioError } =
+      await supabaseClient.storage
+        .from("shopora-music")
+        .createSignedUrl(song.storage_path, 3600);
 
-    avatar.onerror = function() {
-      const placeholder = document.createElement("div");
-      placeholder.className = "profile-placeholder";
-      placeholder.textContent =
-        profileName.textContent.charAt(0).toUpperCase();
-
-      avatar.replaceWith(placeholder);
-    };
-
-    pictureContainer.appendChild(avatar);
-  } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "profile-placeholder";
-    placeholder.textContent =
-      profileName.textContent.charAt(0).toUpperCase();
-
-    pictureContainer.appendChild(placeholder);
+    song.signedUrl = audioError ? null : audio.signedUrl;
+    song.play_count = Number(song.play_count || 0);
   }
 
   renderSongCards(
     songsContainer,
-    artistSongs,
-    "This artist has no approved songs available yet."
+    profileSongList,
+    "This artist has not uploaded any approved songs yet."
   );
 }
 
-// Back to Top Artists.
-document.getElementById("back-to-artists").addEventListener("click", function() {
-  const profileSection = document.getElementById("artist-profile");
+// Return to Top Artists.
+document.getElementById("back-to-artists")
+  .addEventListener("click", function() {
+    document.getElementById("artist-profile").style.display = "none";
 
-  profileSection.style.display = "none";
-
-  document.getElementById("top-artists").scrollIntoView({
-    behavior: "smooth"
+    document.getElementById("top-artists").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
   });
-});
 
 // Normalize genre names.
-function normalizeGenre(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+function normalizeGenre(genre) {
+  return (genre || "").trim().toLowerCase();
 }
 
-// Search approved songs.
-function searchShoporaSongs(query = "", genre = activeGenre) {
-  const searchTerm = String(query || "").trim().toLowerCase();
-  const selectedGenre = normalizeGenre(genre);
+// Search songs and artists.
+function searchShoporaSongs(query) {
+  const searchTerm = (query || "").trim().toLowerCase();
 
-  const filteredSongs = allApprovedSongs.filter(song => {
+  if (!searchTerm) {
+    displayShoporaSongs(
+      activeGenre
+        ? allApprovedSongs.filter(song =>
+            normalizeGenre(song.genre) === normalizeGenre(activeGenre)
+          )
+        : allApprovedSongs
+    );
+    return;
+  }
+
+  const results = allApprovedSongs.filter(song => {
     const title = (song.title || "").toLowerCase();
-    const artist = (song.artist?.display_name || "").toLowerCase();
-    const songGenre = (song.genre || "").toLowerCase();
+    const artist = (
+      song.artist?.display_name || ""
+    ).toLowerCase();
+    const genre = (song.genre || "").toLowerCase();
 
-    const matchesSearch =
-      !searchTerm ||
+    return (
       title.includes(searchTerm) ||
       artist.includes(searchTerm) ||
-      songGenre.includes(searchTerm);
-
-    const matchesGenre =
-      !selectedGenre ||
-      normalizeGenre(song.genre) === selectedGenre;
-
-    return matchesSearch && matchesGenre;
+      genre.includes(searchTerm)
+    );
   });
 
-  displayShoporaSongs(filteredSongs);
+  displayShoporaSongs(results);
 }
 
-// Music category buttons.
-document.querySelectorAll(".category[data-genre]").forEach(button => {
+// Genre category filters.
+document.querySelectorAll(".category").forEach(button => {
   button.addEventListener("click", function() {
-    activeGenre = this.dataset.genre || "";
-
     document.querySelectorAll(".category").forEach(item => {
       item.classList.remove("active");
     });
 
-    this.classList.add("active");
+    button.classList.add("active");
 
-    const searchBox = document.getElementById("song-search");
+    activeGenre = button.dataset.genre || "";
+
+    const filteredSongs = activeGenre
+      ? allApprovedSongs.filter(song =>
+          normalizeGenre(song.genre) === normalizeGenre(activeGenre)
+        )
+      : allApprovedSongs;
+
+    displayShoporaSongs(filteredSongs);
+
+    const searchInput = document.getElementById("song-search");
     const oldSearch = document.getElementById("search-input");
 
-    if (searchBox) searchBox.value = "";
+    if (searchInput) searchInput.value = "";
     if (oldSearch) oldSearch.value = "";
 
-    searchShoporaSongs("", activeGenre);
-
     document.getElementById("music").scrollIntoView({
-      behavior: "smooth"
+      behavior: "smooth",
+      block: "start"
     });
   });
 });
 
-// Music search.
+// Search input.
 const songSearch = document.getElementById("song-search");
-const oldSearch = document.getElementById("search-input");
-const searchForm = document.getElementById("search-form");
 
 if (songSearch) {
   songSearch.addEventListener("input", function() {
-    searchShoporaSongs(this.value, activeGenre);
-
-    if (oldSearch) {
-      oldSearch.value = this.value;
-    }
+    searchShoporaSongs(songSearch.value);
   });
 }
+
+// Search form.
+const searchForm = document.getElementById("search-form");
+const oldSearch = document.getElementById("search-input");
 
 if (searchForm) {
   searchForm.addEventListener("submit", function(e) {
@@ -1114,17 +1180,19 @@ if (searchForm) {
       songSearch.value = query;
     }
 
-    searchShoporaSongs(query, activeGenre);
+    searchShoporaSongs(query);
 
     document.getElementById("music").scrollIntoView({
-      behavior: "smooth"
+      behavior: "smooth",
+      block: "start"
     });
   });
 }
 
-// Start the music website.
+  // Load Shopora Music when the page opens.
 loadShoporaSongs();
 </script>
 
 </body>
 </html>
+  
