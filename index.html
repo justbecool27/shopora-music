@@ -293,6 +293,8 @@ const supabaseClient = window.supabase.createClient(
 );
 
     
+let allApprovedSongs = [];
+
 async function loadShoporaSongs() {
   const songList = document.getElementById("song-list");
 
@@ -319,10 +321,27 @@ async function loadShoporaSongs() {
     return;
   }
 
+  allApprovedSongs = songs || [];
+
+  for (const song of allApprovedSongs) {
+    const { data: audio, error: audioError } =
+      await supabaseClient.storage
+        .from("shopora-music")
+        .createSignedUrl(song.storage_path, 3600);
+
+    song.signedUrl = audioError ? null : audio.signedUrl;
+  }
+
+  displayShoporaSongs(allApprovedSongs);
+}
+
+function displayShoporaSongs(songs) {
+  const songList = document.getElementById("song-list");
+
   songList.replaceChildren();
 
-  if (!songs || songs.length === 0) {
-    songList.textContent = "No approved songs are available yet.";
+  if (songs.length === 0) {
+    songList.textContent = "No matching songs found.";
     return;
   }
 
@@ -342,22 +361,15 @@ async function loadShoporaSongs() {
 
     card.append(title, artist, genre);
 
-    const { data: audio, error: audioError } =
-      await supabaseClient.storage
-        .from("shopora-music")
-        .createSignedUrl(song.storage_path, 3600);
-
-    if (audioError) {
-      console.error(audioError);
-    } else {
+    if (song.signedUrl) {
       const player = document.createElement("audio");
       player.controls = true;
       player.preload = "none";
-      player.src = audio.signedUrl;
+      player.src = song.signedUrl;
       card.appendChild(player);
 
       const download = document.createElement("a");
-      download.href = audio.signedUrl;
+      download.href = song.signedUrl;
       download.download = song.title + ".mp3";
       download.textContent = "Download Song";
       card.appendChild(download);
@@ -367,21 +379,54 @@ async function loadShoporaSongs() {
   }
 }
 
-loadShoporaSongs();
-    
-  
-  
-  document.getElementById("search-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const query = document.getElementById("search-input").value.trim();
+function searchShoporaSongs(query) {
+  const searchTerm = query.trim().toLowerCase();
 
-    if (!query) {
+  const filteredSongs = allApprovedSongs.filter(song => {
+    const title = (song.title || "").toLowerCase();
+    const artist = (song.artist?.display_name || "").toLowerCase();
+    const genre = (song.genre || "").toLowerCase();
+
+    return title.includes(searchTerm) ||
+      artist.includes(searchTerm) ||
+      genre.includes(searchTerm);
+  });
+
+  displayShoporaSongs(filteredSongs);
+}
+
+const songSearch = document.getElementById("song-search");
+const oldSearch = document.getElementById("search-input");
+const searchForm = document.getElementById("search-form");
+
+if (songSearch) {
+  songSearch.addEventListener("input", function() {
+    searchShoporaSongs(this.value);
+
+    if (oldSearch) oldSearch.value = this.value;
+  });
+}
+
+if (searchForm) {
+  searchForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const query = oldSearch ? oldSearch.value : "";
+
+    if (!query.trim()) {
       alert("Please enter a song or artist name.");
       return;
     }
 
-    alert("Music search will be connected to the Shopora Music database next.");
+    if (songSearch) songSearch.value = query;
+
+    searchShoporaSongs(query);
   });
+}
+
+loadShoporaSongs();
+
+
 </script>
 
 </body>
