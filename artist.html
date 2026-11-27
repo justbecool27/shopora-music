@@ -616,6 +616,29 @@
       const file =
         document.getElementById("song-file").files[0];
 
+      const coverFile =
+  document.getElementById("song-cover").files[0];
+
+if (coverFile) {
+  const allowedCoverTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedCoverTypes.includes(coverFile.type)) {
+    artistStatus.textContent =
+      "Please select a JPG, PNG, or WEBP cover image.";
+    return;
+  }
+
+  if (coverFile.size > 5 * 1024 * 1024) {
+    artistStatus.textContent =
+      "Your cover image must not exceed 5 MB.";
+    return;
+  }
+}
+
       if (!file) {
         artistStatus.textContent = "Please select an audio file.";
         return;
