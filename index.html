@@ -299,6 +299,7 @@ const supabaseClient = window.supabase.createClient(
 
     
 let allApprovedSongs = [];
+let activeGenre = "";
 
 async function loadShoporaSongs() {
   const songList = document.getElementById("song-list");
@@ -384,22 +385,44 @@ function displayShoporaSongs(songs) {
   }
 }
 
-function searchShoporaSongs(query) {
+function searchShoporaSongs(query, genre = activeGenre) {
   const searchTerm = query.trim().toLowerCase();
 
   const filteredSongs = allApprovedSongs.filter(song => {
     const title = (song.title || "").toLowerCase();
     const artist = (song.artist?.display_name || "").toLowerCase();
-    const genre = (song.genre || "").toLowerCase();
+    const songGenre = (song.genre || "").toLowerCase();
 
-    return title.includes(searchTerm) ||
+    const matchesSearch =
+      title.includes(searchTerm) ||
       artist.includes(searchTerm) ||
-      genre.includes(searchTerm);
+      songGenre.includes(searchTerm);
+
+    const matchesGenre =
+      !genre || songGenre === genre.toLowerCase();
+
+    return matchesSearch && matchesGenre;
   });
 
   displayShoporaSongs(filteredSongs);
 }
 
+// Music category buttons
+document.querySelectorAll(".category[data-genre]").forEach(button => {
+  button.addEventListener("click", function() {
+    activeGenre = this.dataset.genre;
+
+    const searchBox = document.getElementById("song-search");
+
+    if (searchBox) {
+      searchBox.value = "";
+    }
+
+    searchShoporaSongs("");
+  });
+});
+
+// Music search
 const songSearch = document.getElementById("song-search");
 const oldSearch = document.getElementById("search-input");
 const searchForm = document.getElementById("search-form");
@@ -408,7 +431,9 @@ if (songSearch) {
   songSearch.addEventListener("input", function() {
     searchShoporaSongs(this.value);
 
-    if (oldSearch) oldSearch.value = this.value;
+    if (oldSearch) {
+      oldSearch.value = this.value;
+    }
   });
 }
 
@@ -423,16 +448,16 @@ if (searchForm) {
       return;
     }
 
-    if (songSearch) songSearch.value = query;
+    if (songSearch) {
+      songSearch.value = query;
+    }
 
     searchShoporaSongs(query);
   });
 }
 
 loadShoporaSongs();
-
-
-</script>
+  </script>
 
 </body>
 </html>
