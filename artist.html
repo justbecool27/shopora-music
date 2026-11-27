@@ -1,11 +1,18 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171321">
   <title>Shopora Music - Artist Portal</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 20px;
@@ -16,7 +23,7 @@
 
     .container {
       max-width: 600px;
-      margin: 40px auto;
+      margin: 30px auto;
       padding: 25px;
       background: #241e32;
       border-radius: 15px;
@@ -27,268 +34,584 @@
       text-align: center;
     }
 
+    h2 {
+      color: #f4c75e;
+      margin-top: 25px;
+    }
+
     p {
-      text-align: center;
       color: #ddd;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 7px;
+      color: #f4c75e;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #514563;
+      border-radius: 7px;
+      background: #171321;
+      color: white;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 7px;
+      background: #f4c75e;
+      color: #171321;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid #514563;
+      margin: 28px 0;
+    }
+
+    #artist-dashboard {
+      display: none;
+    }
+
+    #artist-status {
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .small-note {
+      font-size: 13px;
+      color: #bbb;
+    }
+
+    .logout-button {
+      background: #514563;
+      color: white;
     }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <div class="container">
     <h1>♫ Shopora Music</h1>
-    <p>Artist Portal</p>
+    <p style="text-align:center;">Artist Portal</p>
 
     <h2>Welcome, Artists!</h2>
     <p>Register, upload your music, and share your sound with the world.</p>
 
-    
-    
-<h2>Artist Registration</h2>
+    <section id="account-section">
+      <h2>Artist Registration</h2>
 
-<form id="signup-form">
-  <label for="artist-name">Artist or stage name</label>
-  <input id="artist-name" type="text" required
-         placeholder="Enter your artist name">
+      <form id="signup-form">
+        <label for="artist-name">Artist or stage name</label>
+        <input
+          id="artist-name"
+          type="text"
+          required
+          placeholder="Enter your artist name"
+        >
 
-  <label for="signup-email">Email address</label>
-  <input id="signup-email" type="email" required
-         placeholder="Enter your email">
+        <label for="signup-email">Email address</label>
+        <input
+          id="signup-email"
+          type="email"
+          required
+          placeholder="Enter your email"
+        >
 
-  <label for="signup-password">Password</label>
-  <input id="signup-password" type="password"
-         minlength="6" required
-         placeholder="Create a password">
+        <label for="signup-password">Password</label>
+        <input
+          id="signup-password"
+          type="password"
+          minlength="6"
+          required
+          placeholder="Create a password"
+        >
 
-  <button type="submit">Register as Artist</button>
-</form>
+        <button type="submit">Register as Artist</button>
+      </form>
 
-<hr>
+      <hr>
 
-<h2>Artist Sign In</h2>
+      <h2>Artist Sign In</h2>
 
-<form id="login-form">
-  <label for="login-email">Email address</label>
-  <input id="login-email" type="email" required
-         placeholder="Enter your email">
+      <form id="login-form">
+        <label for="login-email">Email address</label>
+        <input
+          id="login-email"
+          type="email"
+          required
+          placeholder="Enter your email"
+        >
 
-  <label for="login-password">Password</label>
-  <input id="login-password" type="password" required
-         placeholder="Enter your password">
+        <label for="login-password">Password</label>
+        <input
+          id="login-password"
+          type="password"
+          required
+          placeholder="Enter your password"
+        >
 
-  <button type="submit">Sign In</button>
-</form>
+        <button type="submit">Sign In</button>
+      </form>
+    </section>
 
-<p id="artist-status">Welcome to Shopora Music!</p>
+    <p id="artist-status">Welcome to Shopora Music!</p>
 
-    
-<hr>
+    <section id="artist-dashboard">
 
-<h2>Upload Your Music</h2>
-<p>Share your music with Shopora Music listeners.</p>
+      <hr>
 
-<form id="upload-form" style="display:none;">
+      <h2>Edit Your Artist Profile</h2>
+      <p>Update your artist name and biography. Your biography can appear on your public artist profile.</p>
 
-  <label for="song-title">Song Title</label>
-  <input
-    type="text"
-    id="song-title"
-    required
-    placeholder="Enter song title"
-  >
+      <form id="profile-form">
+        <label for="profile-name">Artist or stage name</label>
+        <input
+          id="profile-name"
+          type="text"
+          required
+          maxlength="80"
+          placeholder="Your artist name"
+        >
 
-  <label for="song-genre">Music Genre</label>
-  <select id="song-genre" required>
-    <option value="">Choose a genre</option>
-    <option value="Afrobeats">Afrobeats</option>
-    <option value="Gospel">Gospel</option>
-    <option value="Hip-hop">Hip-hop</option>
-    <option value="R&B">R&B</option>
-    <option value="Reggae">Reggae</option>
-    <option value="Pop">Pop</option>
-    <option value="Dancehall">Dancehall</option>
-    <option value="Traditional">Traditional</option>
-  </select>
+        <label for="profile-bio">Artist Biography</label>
+        <textarea
+          id="profile-bio"
+          maxlength="1000"
+          placeholder="Tell listeners about yourself and your music"
+        ></textarea>
 
-  <label for="song-description">Song Description</label>
-  <textarea
-    id="song-description"
-    placeholder="Tell listeners about your song"
-  ></textarea>
+        <p class="small-note">Maximum biography length: 1,000 characters.</p>
 
-  <label for="song-file">Select Audio File</label>
-  <input
-    type="file"
-    id="song-file"
-    accept="audio/*"
-    required
-  >
+        <button id="profile-save-button" type="submit">
+          Save Artist Profile
+        </button>
+      </form>
 
-  <button type="submit">Submit Music</button>
+      <hr>
 
-</form>
-    
-    
+      <h2>Upload Your Music</h2>
+      <p>Share your music with Shopora Music listeners.</p>
+
+      <form id="upload-form">
+
+        <label for="song-title">Song Title</label>
+        <input
+          type="text"
+          id="song-title"
+          required
+          placeholder="Enter song title"
+        >
+
+        <label for="song-genre">Music Genre</label>
+        <select id="song-genre" required>
+          <option value="">Choose a genre</option>
+          <option value="Afrobeats">Afrobeats</option>
+          <option value="Gospel">Gospel</option>
+          <option value="Hip-hop">Hip-hop</option>
+          <option value="R&B">R&B</option>
+          <option value="Reggae">Reggae</option>
+          <option value="Pop">Pop</option>
+          <option value="Dancehall">Dancehall</option>
+          <option value="Traditional">Traditional</option>
+        </select>
+
+        <label for="song-description">Song Description</label>
+        <textarea
+          id="song-description"
+          placeholder="Tell listeners about your song"
+        ></textarea>
+
+        <label for="song-file">Select Audio File</label>
+        <input
+          type="file"
+          id="song-file"
+          accept="audio/*"
+          required
+        >
+
+        <button type="submit">Submit Music</button>
+      </form>
+
+      <button type="button" id="logout-button" class="logout-button">
+        Sign Out
+      </button>
+
+    </section>
   </div>
+
   <script>
-const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
+    const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
 
-const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+    const artistStatus = document.getElementById("artist-status");
+    const accountSection = document.getElementById("account-section");
+    const artistDashboard = document.getElementById("artist-dashboard");
 
-    
-    
-const artistStatus = document.getElementById("artist-status");
+    const profileForm = document.getElementById("profile-form");
+    const profileName = document.getElementById("profile-name");
+    const profileBio = document.getElementById("profile-bio");
+    const profileSaveButton = document.getElementById("profile-save-button");
 
-// Artist registration
-document.getElementById("signup-form").addEventListener("submit", async function(e) {
-  e.preventDefault();
+    const uploadForm = document.getElementById("upload-form");
 
-  artistStatus.textContent = "Creating your artist account...";
+    let currentArtist = null;
 
-  const artistName = document.getElementById("artist-name").value.trim();
-  const email = document.getElementById("signup-email").value.trim();
-  const password = document.getElementById("signup-password").value;
+    // Load the signed-in artist's profile
+    async function loadArtistProfile(user) {
+      currentArtist = user;
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password,
-    options: {
-      data: {
-        display_name: artistName
+      accountSection.style.display = "none";
+      artistDashboard.style.display = "block";
+
+      artistStatus.textContent = "Loading your artist profile...";
+
+      const { data: profile, error } = await supabaseClient
+        .from("artists")
+        .select("id, display_name, bio")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        artistStatus.textContent =
+          "Signed in, but profile could not be loaded: " + error.message;
+        return;
+      }
+
+      if (profile) {
+        profileName.value =
+          profile.display_name ||
+          user.user_metadata?.display_name ||
+          "";
+
+        profileBio.value = profile.bio || "";
+
+        artistStatus.textContent =
+          "Welcome! You are signed in to Shopora Music.";
+      } else {
+        profileName.value =
+          user.user_metadata?.display_name || "";
+
+        profileBio.value = "";
+
+        artistStatus.textContent =
+          "You are signed in. Save your profile to create your artist profile.";
       }
     }
-  });
 
-  if (error) {
-    artistStatus.textContent = error.message;
-    return;
-  }
+    // Artist registration
+    document.getElementById("signup-form").addEventListener(
+      "submit",
+      async function(e) {
+        e.preventDefault();
 
-  artistStatus.textContent =
-    "Registration successful! Check your email if confirmation is required.";
-});
+        artistStatus.textContent = "Creating your artist account...";
 
-// Artist sign-in
-document.getElementById("login-form").addEventListener("submit", async function(e) {
-  e.preventDefault();
+        const artistName =
+          document.getElementById("artist-name").value.trim();
 
-  artistStatus.textContent = "Signing in...";
+        const email =
+          document.getElementById("signup-email").value.trim();
 
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+        const password =
+          document.getElementById("signup-password").value;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              display_name: artistName
+            }
+          }
+        });
 
-  if (error) {
-    artistStatus.textContent = error.message;
-    return;
-  }
+        if (error) {
+          artistStatus.textContent = error.message;
+          return;
+        }
 
-  artistStatus.textContent = "Welcome! You are signed in to Shopora Music.";
-});
-    document.getElementById("upload-form").style.display = "block";
-    
-    
-// Submit music to Shopora Music
-document.getElementById("upload-form").addEventListener("submit", async function(e) {
-  e.preventDefault();
+        artistStatus.textContent =
+          "Registration successful! Check your email if confirmation is required. You can sign in after confirming your email.";
+      }
+    );
 
-  artistStatus.textContent = "Preparing your music upload...";
+    // Artist sign-in
+    document.getElementById("login-form").addEventListener(
+      "submit",
+      async function(e) {
+        e.preventDefault();
 
-  const { data: userData, error: userError } =
-    await supabaseClient.auth.getUser();
+        artistStatus.textContent = "Signing in...";
 
-  if (userError || !userData.user) {
-    artistStatus.textContent = "Please sign in before uploading music.";
-    return;
-  }
+        const email =
+          document.getElementById("login-email").value.trim();
 
-  const user = userData.user;
-  const title = document.getElementById("song-title").value.trim();
-  const genre = document.getElementById("song-genre").value;
-  const description = document.getElementById("song-description").value.trim();
-  const file = document.getElementById("song-file").files[0];
+        const password =
+          document.getElementById("login-password").value;
 
-  if (!file) {
-    artistStatus.textContent = "Please select an audio file.";
-    return;
-  }
+        const { data, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
 
-  const allowedTypes = [
-    "audio/mpeg",
-    "audio/mp4",
-    "audio/aac",
-    "audio/ogg",
-    "audio/wav"
-  ];
+        if (error) {
+          artistStatus.textContent = error.message;
+          return;
+        }
 
-  if (!allowedTypes.includes(file.type)) {
-    artistStatus.textContent = "Please use MP3, MP4 audio, AAC, OGG, or WAV.";
-    return;
-  }
+        await loadArtistProfile(data.user);
+      }
+    );
 
-  if (file.size > 20 * 1024 * 1024) {
-    artistStatus.textContent = "Your audio file must not exceed 20 MB.";
-    return;
-  }
+    // Save artist profile
+    profileForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
 
-  const safeName = file.name
-    .split("/")
-    .pop()
-    .replace(/[^a-zA-Z0-9._-]/g, "-");
+      if (!currentArtist) {
+        artistStatus.textContent = "Please sign in first.";
+        return;
+      }
 
-  const storagePath = user.id + "/" + Date.now() + "-" + safeName;
+      const displayName = profileName.value.trim();
+      const bio = profileBio.value.trim();
 
-  artistStatus.textContent = "Uploading your music...";
+      if (!displayName) {
+        artistStatus.textContent = "Please enter your artist name.";
+        return;
+      }
 
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("shopora-music")
-    .upload(storagePath, file, {
-      contentType: file.type,
-      upsert: false
+      profileSaveButton.disabled = true;
+      profileSaveButton.textContent = "Saving Profile...";
+
+      artistStatus.textContent = "Saving your artist profile...";
+
+      const { data: existingProfile, error: checkError } =
+        await supabaseClient
+          .from("artists")
+          .select("id")
+          .eq("id", currentArtist.id)
+          .maybeSingle();
+
+      if (checkError) {
+        artistStatus.textContent =
+          "Could not check your artist profile: " + checkError.message;
+
+        profileSaveButton.disabled = false;
+        profileSaveButton.textContent = "Save Artist Profile";
+        return;
+      }
+
+      let saveResult;
+
+      if (existingProfile) {
+        saveResult = await supabaseClient
+          .from("artists")
+          .update({
+            display_name: displayName,
+            bio: bio
+          })
+          .eq("id", currentArtist.id);
+      } else {
+        saveResult = await supabaseClient
+          .from("artists")
+          .insert({
+            id: currentArtist.id,
+            display_name: displayName,
+            bio: bio
+          });
+      }
+
+      if (saveResult.error) {
+        artistStatus.textContent =
+          "Profile could not be saved: " + saveResult.error.message;
+
+        profileSaveButton.disabled = false;
+        profileSaveButton.textContent = "Save Artist Profile";
+        return;
+      }
+
+      artistStatus.textContent =
+        "Your artist profile was saved successfully!";
+
+      profileSaveButton.disabled = false;
+      profileSaveButton.textContent = "Save Artist Profile";
     });
 
-  if (uploadError) {
-    artistStatus.textContent = "Upload failed: " + uploadError.message;
-    return;
-  }
+    // Submit music to Shopora Music
+    uploadForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
 
-  const { error: songError } = await supabaseClient
-    .from("songs")
-    .insert({
-      artist_id: user.id,
-      title: title,
-      description: description,
-      genre: genre,
-      storage_path: storagePath,
-      status: "pending"
+      artistStatus.textContent = "Preparing your music upload...";
+
+      const { data: userData, error: userError } =
+        await supabaseClient.auth.getUser();
+
+      if (userError || !userData.user) {
+        artistStatus.textContent =
+          "Please sign in before uploading music.";
+        return;
+      }
+
+      const user = userData.user;
+
+      const title =
+        document.getElementById("song-title").value.trim();
+
+      const genre =
+        document.getElementById("song-genre").value;
+
+      const description =
+        document.getElementById("song-description").value.trim();
+
+      const file =
+        document.getElementById("song-file").files[0];
+
+      if (!file) {
+        artistStatus.textContent = "Please select an audio file.";
+        return;
+      }
+
+      const allowedTypes = [
+        "audio/mpeg",
+        "audio/mp4",
+        "audio/aac",
+        "audio/ogg",
+        "audio/wav"
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        artistStatus.textContent =
+          "Please use MP3, MP4 audio, AAC, OGG, or WAV.";
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        artistStatus.textContent =
+          "Your audio file must not exceed 20 MB.";
+        return;
+      }
+
+      const safeName = file.name
+        .split("/")
+        .pop()
+        .replace(/[^a-zA-Z0-9._-]/g, "-");
+
+      const storagePath =
+        user.id + "/" + Date.now() + "-" + safeName;
+
+      artistStatus.textContent = "Uploading your music...";
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from("shopora-music")
+        .upload(storagePath, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadError) {
+        artistStatus.textContent =
+          "Upload failed: " + uploadError.message;
+        return;
+      }
+
+      const { error: songError } = await supabaseClient
+        .from("songs")
+        .insert({
+          artist_id: user.id,
+          title: title,
+          description: description,
+          genre: genre,
+          storage_path: storagePath,
+          status: "pending"
+        });
+
+      if (songError) {
+        await supabaseClient.storage
+          .from("shopora-music")
+          .remove([storagePath]);
+
+        artistStatus.textContent =
+          "Song record failed: " + songError.message;
+        return;
+      }
+
+      artistStatus.textContent =
+        "Music submitted successfully! It is waiting for administrator approval.";
+
+      uploadForm.reset();
     });
 
-  if (songError) {
-    await supabaseClient.storage
-      .from("shopora-music")
-      .remove([storagePath]);
+    // Sign out
+    document.getElementById("logout-button").addEventListener(
+      "click",
+      async function() {
+        artistStatus.textContent = "Signing out...";
 
-    artistStatus.textContent = "Song record failed: " + songError.message;
-    return;
-  }
+        const { error } = await supabaseClient.auth.signOut();
 
-  artistStatus.textContent =
-    "Music submitted successfully! It is waiting for administrator approval.";
+        if (error) {
+          artistStatus.textContent =
+            "Sign out failed: " + error.message;
+          return;
+        }
 
-  document.getElementById("upload-form").reset();
-});
-    
+        currentArtist = null;
+        artistDashboard.style.display = "none";
+        accountSection.style.display = "block";
+        profileForm.reset();
+
+        artistStatus.textContent =
+          "You have signed out successfully.";
+      }
+    );
+
+    // Restore an existing session if the artist returns to the portal
+    async function checkExistingSession() {
+      const { data, error } =
+        await supabaseClient.auth.getSession();
+
+      if (error) {
+        artistStatus.textContent = error.message;
+        return;
+      }
+
+      if (data.session) {
+        await loadArtistProfile(data.session.user);
+      }
+    }
+
+    checkExistingSession();
   </script>
 </body>
 </html>
