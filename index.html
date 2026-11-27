@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -237,6 +238,7 @@
   <nav>
     <a href="#home">Home</a>
     <a href="#music">Music</a>
+    <a href="#recently-played">Recently Played</a>
     <a href="#categories">Categories</a>
     <a href="#artists">Artists</a>
   </nav>
@@ -275,6 +277,16 @@
   <div class="hero-banner">
     <img src="shopora-music-banner.jpg"
          alt="Shopora Music homepage banner">
+  </div>
+</section>
+
+<section class="section" id="recently-played">
+  <h2>🕘 Recently Played</h2>
+
+  <div id="recently-played-list" class="song-grid">
+    <div class="empty">
+      Your recently played songs will appear here.
+    </div>
   </div>
 </section>
 
@@ -359,6 +371,7 @@ async function loadShoporaSongs() {
   }
 
   displayShoporaSongs(allApprovedSongs);
+  displayRecentlyPlayed();
 }
 
 // Normalize genre names so spaces and punctuation do not cause mismatches.
@@ -368,47 +381,127 @@ function normalizeGenre(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function displayShoporaSongs(songs) {
-  const songList = document.getElementById("song-list");
+// Create a reusable song card.
+function createSongCard(song) {
+  const card = document.createElement("div");
+  card.className = "song-card";
 
-  songList.replaceChildren();
+  const title = document.createElement("h3");
+  title.textContent = song.title;
+
+  const artist = document.createElement("p");
+  artist.textContent =
+    song.artist?.display_name || "Shopora Music Artist";
+
+  const genre = document.createElement("p");
+  genre.textContent = song.genre || "Music";
+
+  card.append(title, artist, genre);
+
+  if (song.signedUrl) {
+    const player = document.createElement("audio");
+    player.controls = true;
+    player.preload = "none";
+    player.src = song.signedUrl;
+
+    player.addEventListener("play", function() {
+      saveRecentlyPlayed(song.id, player);
+    });
+
+    card.appendChild(player);
+
+    const download = document.createElement("a");
+    download.href = song.signedUrl;
+    download.download = song.title + ".mp3";
+    download.textContent = "Download Song";
+    card.appendChild(download);
+  }
+
+  return card;
+}
+
+// Display song cards in a selected section.
+function renderSongCards(container, songs, emptyMessage) {
+  container.replaceChildren();
 
   if (songs.length === 0) {
-    songList.textContent = "No matching songs found.";
+    const message = document.createElement("div");
+    message.className = "empty";
+    message.textContent = emptyMessage;
+    container.appendChild(message);
     return;
   }
 
-  for (const song of songs) {
-    const card = document.createElement("div");
-    card.className = "song-card";
+  songs.forEach(song => {
+    container.appendChild(createSongCard(song));
+  });
+}
 
-    const title = document.createElement("h3");
-    title.textContent = song.title;
+function displayShoporaSongs(songs) {
+  const songList = document.getElementById("song-list");
 
-    const artist = document.createElement("p");
-    artist.textContent =
-      song.artist?.display_name || "Shopora Music Artist";
+  renderSongCards(
+    songList,
+    songs,
+    "No matching songs found."
+  );
+}
 
-    const genre = document.createElement("p");
-    genre.textContent = song.genre || "Music";
+// Save recently played song IDs in this browser.
+function saveRecentlyPlayed(songId, player) {
+  try {
+    let history = JSON.parse(
+      localStorage.getItem("shoporaRecentlyPlayed") || "[]"
+    );
 
-    card.append(title, artist, genre);
+    const alreadyFirst = history[0] === songId;
 
-    if (song.signedUrl) {
-      const player = document.createElement("audio");
-      player.controls = true;
-      player.preload = "none";
-      player.src = song.signedUrl;
-      card.appendChild(player);
+    history = history.filter(id => id !== songId);
+    history.unshift(songId);
+    history = history.slice(0, 10);
 
-      const download = document.createElement("a");
-      download.href = song.signedUrl;
-      download.download = song.title + ".mp3";
-      download.textContent = "Download Song";
-      card.appendChild(download);
+    localStorage.setItem(
+      "shoporaRecentlyPlayed",
+      JSON.stringify(history)
+    );
+
+    // Do not rebuild the section while its own audio is playing.
+    if (
+      !alreadyFirst &&
+      (!player || !player.closest("#recently-played-list"))
+    ) {
+      displayRecentlyPlayed();
     }
+  } catch (error) {
+    console.error("Could not save listening history:", error);
+  }
+}
 
-    songList.appendChild(card);
+// Display recently played songs.
+function displayRecentlyPlayed() {
+  const container = document.getElementById("recently-played-list");
+
+  if (!container) return;
+
+  try {
+    const history = JSON.parse(
+      localStorage.getItem("shoporaRecentlyPlayed") || "[]"
+    );
+
+    const recentSongs = history
+      .map(id => allApprovedSongs.find(song => song.id === id))
+      .filter(song => song && song.signedUrl);
+
+    renderSongCards(
+      container,
+      recentSongs,
+      "Your recently played songs will appear here."
+    );
+  } catch (error) {
+    console.error("Could not load listening history:", error);
+
+    container.textContent =
+      "Recently played songs are unavailable.";
   }
 }
 
@@ -437,7 +530,7 @@ function searchShoporaSongs(query = "", genre = activeGenre) {
   displayShoporaSongs(filteredSongs);
 }
 
-// Music category buttons
+// Music category buttons.
 document.querySelectorAll(".category[data-genre]").forEach(button => {
   button.addEventListener("click", function() {
     activeGenre = this.dataset.genre || "";
@@ -454,7 +547,6 @@ document.querySelectorAll(".category[data-genre]").forEach(button => {
     if (searchBox) searchBox.value = "";
     if (oldSearch) oldSearch.value = "";
 
-    // Pass the selected genre directly.
     searchShoporaSongs("", activeGenre);
 
     document.getElementById("music").scrollIntoView({
@@ -463,7 +555,7 @@ document.querySelectorAll(".category[data-genre]").forEach(button => {
   });
 });
 
-// Music search
+// Music search.
 const songSearch = document.getElementById("song-search");
 const oldSearch = document.getElementById("search-input");
 const searchForm = document.getElementById("search-form");
