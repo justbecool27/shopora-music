@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,6 +288,80 @@
       font-size: 13px;
       font-weight: bold;
     }
+
+    /* Artist Profile */
+    #artist-profile {
+      display: none;
+      padding: 45px 6%;
+      background: #191428;
+      border-top: 1px solid #352a48;
+      border-bottom: 1px solid #352a48;
+    }
+
+    .profile-header {
+      text-align: center;
+      max-width: 750px;
+      margin: 0 auto 30px;
+    }
+
+    .profile-avatar {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid #f4c75e;
+      margin-bottom: 15px;
+      background: #352a48;
+    }
+
+    .profile-placeholder {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #352a48;
+      color: #f4c75e;
+      border: 4px solid #f4c75e;
+      font-size: 50px;
+      font-weight: bold;
+    }
+
+    .profile-name {
+      color: #f4c75e;
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .profile-bio {
+      color: #c9c3d5;
+      margin: 12px auto;
+      white-space: pre-wrap;
+    }
+
+    .profile-stat {
+      color: #f4c75e;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .back-button {
+      margin-bottom: 25px;
+    }
+
+    .artist-profile-button {
+      margin-top: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .artist-song-button {
+      margin-top: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
   </style>
 </head>
 
@@ -349,12 +424,40 @@
   </div>
 </section>
 
-<!-- TOP ARTISTS SECTION -->
 <section class="section" id="top-artists">
   <h2>🌟 Top Artists</h2>
 
   <div id="top-artist-list" class="artist-grid">
     <div class="empty">Loading top artists...</div>
+  </div>
+</section>
+
+<!-- ARTIST PROFILE SECTION -->
+<section id="artist-profile">
+  <button type="button" class="back-button" id="back-to-artists">
+    ← Back to Top Artists
+  </button>
+
+  <div class="profile-header">
+    <div id="profile-picture-container"></div>
+
+    <h2 class="profile-name" id="profile-name">
+      Artist Name
+    </h2>
+
+    <p class="profile-bio" id="profile-bio">
+      Artist biography
+    </p>
+
+    <p class="profile-stat" id="profile-total-plays">
+      ▶ 0 total plays
+    </p>
+  </div>
+
+  <h2>🎵 Songs by This Artist</h2>
+
+  <div id="artist-profile-songs" class="song-grid">
+    <div class="empty">Loading artist songs...</div>
   </div>
 </section>
 
@@ -400,7 +503,6 @@
 <script>
 const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
 
-// Keep your existing Supabase publishable key.
 const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
 
 const supabaseClient = window.supabase.createClient(
@@ -409,8 +511,10 @@ const supabaseClient = window.supabase.createClient(
 );
 
 let allApprovedSongs = [];
+let allTopArtists = [];
 let activeGenre = "";
 
+// Load approved songs.
 async function loadShoporaSongs() {
   const songList = document.getElementById("song-list");
 
@@ -455,7 +559,6 @@ async function loadShoporaSongs() {
   displayRecentlyPlayed();
   displayPopularSongs();
 
-  // Load the Top Artists section.
   await loadTopArtists();
 }
 
@@ -480,6 +583,30 @@ function createSongCard(song) {
     "▶ " + Number(song.play_count || 0).toLocaleString() + " plays";
 
   card.append(title, artist, genre, plays);
+
+  // Add a profile button when the song has an artist ID.
+  if (song.artist_id) {
+    const profileButton = document.createElement("button");
+    profileButton.type = "button";
+    profileButton.className = "artist-song-button";
+    profileButton.textContent = "View Artist Profile";
+
+    profileButton.addEventListener("click", function() {
+      const cachedArtist = allTopArtists.find(
+        item => item.artist_id === song.artist_id
+      );
+
+      openArtistProfile(
+        song.artist_id,
+        cachedArtist || {
+          artist_id: song.artist_id,
+          display_name: song.artist?.display_name || "Shopora Music Artist"
+        }
+      );
+    });
+
+    card.appendChild(profileButton);
+  }
 
   if (song.signedUrl) {
     const player = document.createElement("audio");
@@ -539,7 +666,7 @@ function displayShoporaSongs(songs) {
   );
 }
 
-// Save recently played song IDs in this browser.
+// Save recently played song IDs.
 function saveRecentlyPlayed(songId, player) {
   try {
     let history = JSON.parse(
@@ -590,8 +717,6 @@ async function recordSongPlay(song, player) {
   }
 
   displayPopularSongs();
-
-  // Refresh artist rankings after a successful play.
   loadTopArtists();
 }
 
@@ -643,7 +768,7 @@ function displayPopularSongs() {
   );
 }
 
-// Load the Top Artists from Supabase.
+// Load Top Artists from Supabase.
 async function loadTopArtists() {
   const container = document.getElementById("top-artist-list");
 
@@ -656,7 +781,7 @@ async function loadTopArtists() {
   if (error) {
     console.error("Top Artists loading error:", error);
 
-    container.innerHTML = "";
+    container.replaceChildren();
 
     const message = document.createElement("div");
     message.className = "empty";
@@ -667,9 +792,10 @@ async function loadTopArtists() {
     return;
   }
 
-  container.innerHTML = "";
+  allTopArtists = artists || [];
+  container.replaceChildren();
 
-  if (!artists || artists.length === 0) {
+  if (allTopArtists.length === 0) {
     const message = document.createElement("div");
     message.className = "empty";
     message.textContent =
@@ -679,11 +805,10 @@ async function loadTopArtists() {
     return;
   }
 
-  artists.forEach((artist, index) => {
+  allTopArtists.forEach((artist, index) => {
     const card = document.createElement("div");
     card.className = "top-artist-card";
 
-    // Artist profile picture or initials.
     if (artist.avatar_url) {
       const avatar = document.createElement("img");
       avatar.className = "artist-avatar";
@@ -722,10 +847,120 @@ async function loadTopArtists() {
     plays.textContent =
       "▶ " + Number(artist.total_plays || 0).toLocaleString() + " total plays";
 
-    card.append(name, bio, plays);
+    const viewButton = document.createElement("button");
+    viewButton.type = "button";
+    viewButton.className = "artist-profile-button";
+    viewButton.textContent = "View Artist Profile";
+
+    viewButton.addEventListener("click", function() {
+      openArtistProfile(artist.artist_id, artist);
+    });
+
+    card.append(name, bio, plays, viewButton);
     container.appendChild(card);
   });
 }
+
+// Open an artist's profile.
+async function openArtistProfile(artistId, artistData = null) {
+  const profileSection = document.getElementById("artist-profile");
+  const pictureContainer = document.getElementById("profile-picture-container");
+  const profileName = document.getElementById("profile-name");
+  const profileBio = document.getElementById("profile-bio");
+  const profilePlays = document.getElementById("profile-total-plays");
+  const songsContainer = document.getElementById("artist-profile-songs");
+
+  if (!artistId) {
+    alert("Artist information is not available.");
+    return;
+  }
+
+  profileSection.style.display = "block";
+  profileSection.scrollIntoView({ behavior: "smooth" });
+
+  pictureContainer.replaceChildren();
+  profileName.textContent = "Loading artist...";
+  profileBio.textContent = "";
+  profilePlays.textContent = "";
+  songsContainer.innerHTML = '<div class="empty">Loading artist songs...</div>';
+
+  let artist = artistData;
+
+  // If artist information is not already available, request it.
+  if (!artist || !artist.display_name) {
+    const { data, error } = await supabaseClient
+      .from("artists")
+      .select("id, display_name, bio, avatar_url")
+      .eq("id", artistId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Artist profile loading error:", error);
+    }
+
+    artist = data || artist || {};
+  }
+
+  profileName.textContent =
+    artist.display_name || "Shopora Music Artist";
+
+  profileBio.textContent =
+    artist.bio || "This artist has not added a biography yet.";
+
+  const artistSongs = allApprovedSongs.filter(
+    song => song.artist_id === artistId
+  );
+
+  const totalPlays = artistSongs.reduce(
+    (total, song) => total + Number(song.play_count || 0),
+    0
+  );
+
+  profilePlays.textContent =
+    "▶ " + totalPlays.toLocaleString() + " total plays";
+
+  if (artist.avatar_url) {
+    const avatar = document.createElement("img");
+    avatar.className = "profile-avatar";
+    avatar.src = artist.avatar_url;
+    avatar.alt = profileName.textContent + " profile picture";
+
+    avatar.onerror = function() {
+      const placeholder = document.createElement("div");
+      placeholder.className = "profile-placeholder";
+      placeholder.textContent =
+        profileName.textContent.charAt(0).toUpperCase();
+
+      avatar.replaceWith(placeholder);
+    };
+
+    pictureContainer.appendChild(avatar);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "profile-placeholder";
+    placeholder.textContent =
+      profileName.textContent.charAt(0).toUpperCase();
+
+    pictureContainer.appendChild(placeholder);
+  }
+
+  renderSongCards(
+    songsContainer,
+    artistSongs,
+    "This artist has no approved songs available yet."
+  );
+}
+
+// Back to Top Artists.
+document.getElementById("back-to-artists").addEventListener("click", function() {
+  const profileSection = document.getElementById("artist-profile");
+
+  profileSection.style.display = "none";
+
+  document.getElementById("top-artists").scrollIntoView({
+    behavior: "smooth"
+  });
+});
 
 // Normalize genre names.
 function normalizeGenre(value) {
@@ -823,6 +1058,7 @@ if (searchForm) {
   });
 }
 
+// Start the music website.
 loadShoporaSongs();
 </script>
 
