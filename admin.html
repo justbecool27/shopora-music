@@ -168,51 +168,122 @@ if (!admin) {
         loadPendingSongs();
       });
 
-    async function loadPendingSongs() {
-      const songList = document.getElementById("song-list");
+    
+        
+async function loadPendingSongs() {
+  const songList = document.getElementById("song-list");
 
-      songList.textContent = "Loading pending songs...";
+  songList.textContent = "Loading pending songs...";
 
-      const { data: songs, error } = await supabaseClient
-        .from("songs")
-        .select("id, title, genre, description, storage_path, status")
-        .eq("status", "pending")
-        .order("created_at", { ascending: false });
+  const { data: songs, error } = await supabaseClient
+    .from("songs")
+    .select("id, title, genre, description, storage_path, status")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
 
-      if (error) {
-        songList.textContent = "Error: " + error.message;
-        return;
-      }
+  if (error) {
+    songList.textContent = "Error: " + error.message;
+    return;
+  }
 
-      if (!songs.length) {
-        songList.textContent = "No pending songs.";
-        return;
-      }
+  if (!songs || songs.length === 0) {
+    songList.textContent = "No pending songs.";
+    return;
+  }
 
-      songList.innerHTML = "";
+  songList.innerHTML = "";
 
-      songs.forEach(song => {
-        const item = document.createElement("div");
-        item.className = "song";
+  for (const song of songs) {
+    const item = document.createElement("div");
+    item.className = "song";
 
-        const heading = document.createElement("h3");
-        heading.textContent = song.title;
+    const heading = document.createElement("h3");
+    heading.textContent = song.title;
 
-        const details = document.createElement("p");
-        details.textContent = song.genre + " | " + song.status;
+    const details = document.createElement("p");
+    details.textContent = song.genre + " | " + song.status;
 
-        item.appendChild(heading);
-        item.appendChild(details);
+    const description = document.createElement("p");
+    description.textContent = song.description || "No description provided.";
 
-        songList.appendChild(item);
-      });
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.style.width = "100%";
+
+    const { data: signed, error: audioError } =
+      await supabaseClient.storage
+        .from("shopora-music")
+        .createSignedUrl(song.storage_path, 3600);
+
+    if (audioError) {
+      const audioMessage = document.createElement("p");
+      audioMessage.textContent =
+        "Audio preview unavailable: " + audioError.message;
+      item.appendChild(audioMessage);
+    } else {
+      audio.src = signed.signedUrl;
+      item.appendChild(audio);
     }
 
-    document.getElementById("logout-button")
-      .addEventListener("click", async function() {
-        await supabaseClient.auth.signOut();
-        location.reload();
-      });
+    const approveButton = document.createElement("button");
+    approveButton.textContent = "Approve Song";
+
+    approveButton.addEventListener("click", async function() {
+      if (!confirm("Approve this song?")) return;
+
+      approveButton.disabled = true;
+
+      const { error } = await supabaseClient
+        .from("songs")
+        .update({ status: "approved" })
+        .eq("id", song.id)
+        .eq("status", "pending");
+
+      if (error) {
+        alert("Approval failed: " + error.message);
+        approveButton.disabled = false;
+        return;
+      }
+
+      alert("Song approved successfully!");
+      loadPendingSongs();
+    });
+
+    const rejectButton = document.createElement("button");
+    rejectButton.textContent = "Reject Song";
+
+    rejectButton.addEventListener("click", async function() {
+      if (!confirm("Reject this song?")) return;
+
+      rejectButton.disabled = true;
+
+      const { error } = await supabaseClient
+        .from("songs")
+        .update({ status: "rejected" })
+        .eq("id", song.id)
+        .eq("status", "pending");
+
+      if (error) {
+        alert("Rejection failed: " + error.message);
+        rejectButton.disabled = false;
+        return;
+      }
+
+      alert("Song rejected.");
+      loadPendingSongs();
+    });
+
+    item.appendChild(heading);
+    item.appendChild(details);
+    item.appendChild(description);
+    item.appendChild(approveButton);
+    item.appendChild(rejectButton);
+
+    songList.appendChild(item);
+  }
+}
+
+    
   </script>
 </body>
 </html>
