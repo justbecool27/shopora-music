@@ -410,6 +410,104 @@
       padding: 10px 14px;
       font-size: 13px;
     }
+/* Shopora Music - Mobile Design Upgrade */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+nav a {
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+nav a:hover {
+  background: #352a48;
+}
+
+.song-card,
+.top-artist-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.song-card:hover,
+.top-artist-card:hover {
+  transform: translateY(-3px);
+  border-color: #f4c75e;
+}
+
+button,
+.button,
+.category {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.song-card audio {
+  min-height: 42px;
+}
+
+@media (max-width: 600px) {
+  header {
+    padding: 12px 4%;
+    gap: 8px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  nav {
+    width: 100%;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  nav a {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .hero {
+    padding: 45px 5%;
+  }
+
+  .section {
+    padding: 30px 5%;
+  }
+
+  .section h2 {
+    font-size: 22px;
+  }
+
+  .song-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .song-card {
+    padding: 16px;
+  }
+
+  .categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .category {
+    padding: 14px 8px;
+    font-size: 13px;
+  }
+
+  .artist {
+    margin: 10px 5% 35px;
+  }
+}
+    
   </style>
 </head>
 
