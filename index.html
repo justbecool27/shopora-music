@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -228,6 +227,12 @@
       color: #f4c75e;
       margin-top: 8px;
     }
+
+    .play-count {
+      color: #f4c75e !important;
+      font-size: 13px;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -238,6 +243,7 @@
   <nav>
     <a href="#home">Home</a>
     <a href="#music">Music</a>
+    <a href="#popular">Popular Songs</a>
     <a href="#recently-played">Recently Played</a>
     <a href="#categories">Categories</a>
     <a href="#artists">Artists</a>
@@ -277,6 +283,16 @@
   <div class="hero-banner">
     <img src="shopora-music-banner.jpg"
          alt="Shopora Music homepage banner">
+  </div>
+</section>
+
+<section class="section" id="popular">
+  <h2>🔥 Popular Songs</h2>
+
+  <div id="popular-song-list" class="song-grid">
+    <div class="empty">
+      Loading popular songs...
+    </div>
   </div>
 </section>
 
@@ -322,7 +338,7 @@
 <script>
 const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
 
-// Keep your existing Supabase publishable key here.
+// Your existing Supabase publishable key.
 const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
 
 const supabaseClient = window.supabase.createClient(
@@ -348,6 +364,7 @@ async function loadShoporaSongs() {
       storage_path,
       cover_path,
       created_at,
+      play_count,
       artist:artists(display_name)
     `)
     .eq("status", "approved")
@@ -368,13 +385,15 @@ async function loadShoporaSongs() {
         .createSignedUrl(song.storage_path, 3600);
 
     song.signedUrl = audioError ? null : audio.signedUrl;
+    song.play_count = Number(song.play_count || 0);
   }
 
   displayShoporaSongs(allApprovedSongs);
   displayRecentlyPlayed();
+  displayPopularSongs();
 }
 
-// Normalize genre names so spaces and punctuation do not cause mismatches.
+// Normalize genre names.
 function normalizeGenre(value) {
   return String(value || "")
     .toLowerCase()
@@ -396,7 +415,12 @@ function createSongCard(song) {
   const genre = document.createElement("p");
   genre.textContent = song.genre || "Music";
 
-  card.append(title, artist, genre);
+  const plays = document.createElement("p");
+  plays.className = "play-count";
+  plays.textContent =
+    "▶ " + Number(song.play_count || 0).toLocaleString() + " plays";
+
+  card.append(title, artist, genre, plays);
 
   if (song.signedUrl) {
     const player = document.createElement("audio");
@@ -404,8 +428,17 @@ function createSongCard(song) {
     player.preload = "none";
     player.src = song.signedUrl;
 
+    let countedThisPlayback = false;
+
     player.addEventListener("play", function() {
-      saveRecentlyPlayed(song.id, player);
+      if (countedThisPlayback) return;
+
+      countedThisPlayback = true;
+      recordSongPlay(song, player);
+    });
+
+    player.addEventListener("ended", function() {
+      countedThisPlayback = false;
     });
 
     card.appendChild(player);
@@ -420,7 +453,7 @@ function createSongCard(song) {
   return card;
 }
 
-// Display song cards in a selected section.
+// Display song cards.
 function renderSongCards(container, songs, emptyMessage) {
   container.replaceChildren();
 
@@ -454,8 +487,6 @@ function saveRecentlyPlayed(songId, player) {
       localStorage.getItem("shoporaRecentlyPlayed") || "[]"
     );
 
-    const alreadyFirst = history[0] === songId;
-
     history = history.filter(id => id !== songId);
     history.unshift(songId);
     history = history.slice(0, 10);
@@ -465,16 +496,41 @@ function saveRecentlyPlayed(songId, player) {
       JSON.stringify(history)
     );
 
-    // Do not rebuild the section while its own audio is playing.
     if (
-      !alreadyFirst &&
-      (!player || !player.closest("#recently-played-list"))
+      !player ||
+      !player.closest("#recently-played-list")
     ) {
       displayRecentlyPlayed();
     }
   } catch (error) {
     console.error("Could not save listening history:", error);
   }
+}
+
+// Record a play in Supabase.
+async function recordSongPlay(song, player) {
+  saveRecentlyPlayed(song.id, player);
+
+  const { error } = await supabaseClient.rpc(
+    "increment_song_play_count",
+    { p_song_id: song.id }
+  );
+
+  if (error) {
+    console.error("Could not record song play:", error);
+    return;
+  }
+
+  const currentSong = allApprovedSongs.find(
+    item => item.id === song.id
+  );
+
+  if (currentSong) {
+    currentSong.play_count =
+      Number(currentSong.play_count || 0) + 1;
+  }
+
+  displayPopularSongs();
 }
 
 // Display recently played songs.
@@ -505,6 +561,27 @@ function displayRecentlyPlayed() {
   }
 }
 
+// Display the 10 most played approved songs.
+function displayPopularSongs() {
+  const container = document.getElementById("popular-song-list");
+
+  if (!container) return;
+
+  const popularSongs = [...allApprovedSongs]
+    .filter(song => song.signedUrl)
+    .sort((a, b) =>
+      Number(b.play_count || 0) - Number(a.play_count || 0)
+    )
+    .slice(0, 10);
+
+  renderSongCards(
+    container,
+    popularSongs,
+    "No popular songs are available yet. Start listening to discover music!"
+  );
+}
+
+// Search approved songs.
 function searchShoporaSongs(query = "", genre = activeGenre) {
   const searchTerm = String(query || "").trim().toLowerCase();
   const selectedGenre = normalizeGenre(genre);
