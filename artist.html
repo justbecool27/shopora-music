@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +8,7 @@
   <title>Shopora Music - Artist Portal</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -34,15 +31,9 @@
       text-align: center;
     }
 
-    h2 {
-      color: #f4c75e;
-      margin-top: 25px;
-    }
+    h2 { color: #f4c75e; margin-top: 25px; }
 
-    p {
-      color: #ddd;
-      line-height: 1.5;
-    }
+    p { color: #ddd; line-height: 1.5; }
 
     label {
       display: block;
@@ -90,9 +81,7 @@
       margin: 28px 0;
     }
 
-    #artist-dashboard {
-      display: none;
-    }
+    #artist-dashboard { display: none; }
 
     #artist-status {
       text-align: center;
@@ -107,6 +96,16 @@
     .logout-button {
       background: #514563;
       color: white;
+    }
+
+    #avatar-preview {
+      display: none;
+      width: 130px;
+      height: 130px;
+      margin: 15px auto;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #f4c75e;
     }
   </style>
 
@@ -126,29 +125,16 @@
 
       <form id="signup-form">
         <label for="artist-name">Artist or stage name</label>
-        <input
-          id="artist-name"
-          type="text"
-          required
-          placeholder="Enter your artist name"
-        >
+        <input id="artist-name" type="text" required
+          placeholder="Enter your artist name">
 
         <label for="signup-email">Email address</label>
-        <input
-          id="signup-email"
-          type="email"
-          required
-          placeholder="Enter your email"
-        >
+        <input id="signup-email" type="email" required
+          placeholder="Enter your email">
 
         <label for="signup-password">Password</label>
-        <input
-          id="signup-password"
-          type="password"
-          minlength="6"
-          required
-          placeholder="Create a password"
-        >
+        <input id="signup-password" type="password"
+          minlength="6" required placeholder="Create a password">
 
         <button type="submit">Register as Artist</button>
       </form>
@@ -159,20 +145,12 @@
 
       <form id="login-form">
         <label for="login-email">Email address</label>
-        <input
-          id="login-email"
-          type="email"
-          required
-          placeholder="Enter your email"
-        >
+        <input id="login-email" type="email" required
+          placeholder="Enter your email">
 
         <label for="login-password">Password</label>
-        <input
-          id="login-password"
-          type="password"
-          required
-          placeholder="Enter your password"
-        >
+        <input id="login-password" type="password" required
+          placeholder="Enter your password">
 
         <button type="submit">Sign In</button>
       </form>
@@ -181,28 +159,19 @@
     <p id="artist-status">Welcome to Shopora Music!</p>
 
     <section id="artist-dashboard">
-
       <hr>
 
       <h2>Edit Your Artist Profile</h2>
-      <p>Update your artist name and biography. Your biography can appear on your public artist profile.</p>
+      <p>Update your artist name, biography, and profile picture.</p>
 
       <form id="profile-form">
         <label for="profile-name">Artist or stage name</label>
-        <input
-          id="profile-name"
-          type="text"
-          required
-          maxlength="80"
-          placeholder="Your artist name"
-        >
+        <input id="profile-name" type="text" required
+          maxlength="80" placeholder="Your artist name">
 
         <label for="profile-bio">Artist Biography</label>
-        <textarea
-          id="profile-bio"
-          maxlength="1000"
-          placeholder="Tell listeners about yourself and your music"
-        ></textarea>
+        <textarea id="profile-bio" maxlength="1000"
+          placeholder="Tell listeners about yourself and your music"></textarea>
 
         <p class="small-note">Maximum biography length: 1,000 characters.</p>
 
@@ -213,18 +182,35 @@
 
       <hr>
 
+      <h2>Artist Profile Picture</h2>
+      <p>Choose a picture that represents you as an artist.</p>
+
+      <img id="avatar-preview" alt="Artist profile picture preview">
+
+      <label for="avatar-file">Choose Profile Picture</label>
+      <input
+        id="avatar-file"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+      >
+
+      <p class="small-note">
+        Accepted formats: JPG, PNG and WEBP. Maximum size: 2 MB.
+      </p>
+
+      <button type="button" id="avatar-upload-button">
+        Upload Profile Picture
+      </button>
+
+      <hr>
+
       <h2>Upload Your Music</h2>
       <p>Share your music with Shopora Music listeners.</p>
 
       <form id="upload-form">
-
         <label for="song-title">Song Title</label>
-        <input
-          type="text"
-          id="song-title"
-          required
-          placeholder="Enter song title"
-        >
+        <input type="text" id="song-title" required
+          placeholder="Enter song title">
 
         <label for="song-genre">Music Genre</label>
         <select id="song-genre" required>
@@ -240,18 +226,12 @@
         </select>
 
         <label for="song-description">Song Description</label>
-        <textarea
-          id="song-description"
-          placeholder="Tell listeners about your song"
-        ></textarea>
+        <textarea id="song-description"
+          placeholder="Tell listeners about your song"></textarea>
 
         <label for="song-file">Select Audio File</label>
-        <input
-          type="file"
-          id="song-file"
-          accept="audio/*"
-          required
-        >
+        <input type="file" id="song-file"
+          accept="audio/*" required>
 
         <button type="submit">Submit Music</button>
       </form>
@@ -259,13 +239,15 @@
       <button type="button" id="logout-button" class="logout-button">
         Sign Out
       </button>
-
     </section>
   </div>
 
   <script>
-    const SUPABASE_URL = "https://zhkmsdsypljlhwdfcury.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
+    const SUPABASE_URL =
+      "https://zhkmsdsypljlhwdfcury.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_mu3TQraTI0MVublU16j5Kg_bxcakNPB";
 
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
@@ -279,13 +261,29 @@
     const profileForm = document.getElementById("profile-form");
     const profileName = document.getElementById("profile-name");
     const profileBio = document.getElementById("profile-bio");
-    const profileSaveButton = document.getElementById("profile-save-button");
+    const profileSaveButton =
+      document.getElementById("profile-save-button");
+
+    const avatarFile = document.getElementById("avatar-file");
+    const avatarPreview = document.getElementById("avatar-preview");
+    const avatarUploadButton =
+      document.getElementById("avatar-upload-button");
 
     const uploadForm = document.getElementById("upload-form");
 
     let currentArtist = null;
 
-    // Load the signed-in artist's profile
+    function showAvatar(url) {
+      if (url) {
+        avatarPreview.src = url;
+        avatarPreview.style.display = "block";
+      } else {
+        avatarPreview.removeAttribute("src");
+        avatarPreview.style.display = "none";
+      }
+    }
+
+    // Load artist profile
     async function loadArtistProfile(user) {
       currentArtist = user;
 
@@ -296,24 +294,24 @@
 
       const { data: profile, error } = await supabaseClient
         .from("artists")
-        .select("id, display_name, bio")
+        .select("id, display_name, bio, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
       if (error) {
         artistStatus.textContent =
-          "Signed in, but profile could not be loaded: " + error.message;
+          "Signed in, but profile could not be loaded: " +
+          error.message;
         return;
       }
 
       if (profile) {
         profileName.value =
           profile.display_name ||
-          user.user_metadata?.display_name ||
-          "";
+          user.user_metadata?.display_name || "";
 
         profileBio.value = profile.bio || "";
-
+        showAvatar(profile.avatar_url);
         artistStatus.textContent =
           "Welcome! You are signed in to Shopora Music.";
       } else {
@@ -321,6 +319,7 @@
           user.user_metadata?.display_name || "";
 
         profileBio.value = "";
+        showAvatar(null);
 
         artistStatus.textContent =
           "You are signed in. Save your profile to create your artist profile.";
@@ -329,8 +328,7 @@
 
     // Artist registration
     document.getElementById("signup-form").addEventListener(
-      "submit",
-      async function(e) {
+      "submit", async function(e) {
         e.preventDefault();
 
         artistStatus.textContent = "Creating your artist account...";
@@ -344,13 +342,11 @@
         const password =
           document.getElementById("signup-password").value;
 
-        const { data, error } = await supabaseClient.auth.signUp({
+        const { error } = await supabaseClient.auth.signUp({
           email: email,
           password: password,
           options: {
-            data: {
-              display_name: artistName
-            }
+            data: { display_name: artistName }
           }
         });
 
@@ -360,14 +356,13 @@
         }
 
         artistStatus.textContent =
-          "Registration successful! Check your email if confirmation is required. You can sign in after confirming your email.";
+          "Registration successful! Check your email if confirmation is required.";
       }
     );
 
     // Artist sign-in
     document.getElementById("login-form").addEventListener(
-      "submit",
-      async function(e) {
+      "submit", async function(e) {
         e.preventDefault();
 
         artistStatus.textContent = "Signing in...";
@@ -393,7 +388,7 @@
       }
     );
 
-    // Save artist profile
+    // Save artist name and biography
     profileForm.addEventListener("submit", async function(e) {
       e.preventDefault();
 
@@ -411,8 +406,6 @@
       }
 
       profileSaveButton.disabled = true;
-      profileSaveButton.textContent = "Saving Profile...";
-
       artistStatus.textContent = "Saving your artist profile...";
 
       const { data: existingProfile, error: checkError } =
@@ -424,10 +417,8 @@
 
       if (checkError) {
         artistStatus.textContent =
-          "Could not check your artist profile: " + checkError.message;
-
+          "Could not check your profile: " + checkError.message;
         profileSaveButton.disabled = false;
-        profileSaveButton.textContent = "Save Artist Profile";
         return;
       }
 
@@ -454,20 +445,139 @@
       if (saveResult.error) {
         artistStatus.textContent =
           "Profile could not be saved: " + saveResult.error.message;
+      } else {
+        artistStatus.textContent =
+          "Your artist profile was saved successfully!";
+      }
 
-        profileSaveButton.disabled = false;
-        profileSaveButton.textContent = "Save Artist Profile";
+      profileSaveButton.disabled = false;
+    });
+
+    // Upload artist profile picture
+    avatarUploadButton.addEventListener("click", async function() {
+      if (!currentArtist) {
+        artistStatus.textContent = "Please sign in first.";
         return;
       }
 
-      artistStatus.textContent =
-        "Your artist profile was saved successfully!";
+      const file = avatarFile.files[0];
 
-      profileSaveButton.disabled = false;
-      profileSaveButton.textContent = "Save Artist Profile";
+      if (!file) {
+        artistStatus.textContent =
+          "Please choose a profile picture first.";
+        return;
+      }
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        artistStatus.textContent =
+          "Please select a JPG, PNG, or WEBP image.";
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        artistStatus.textContent =
+          "Your picture must not exceed 2 MB.";
+        return;
+      }
+
+      const extensions = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp"
+      };
+
+      const storagePath =
+        currentArtist.id + "/" +
+        Date.now() + "." + extensions[file.type];
+
+      avatarUploadButton.disabled = true;
+      avatarUploadButton.textContent = "Uploading Picture...";
+
+      artistStatus.textContent =
+        "Uploading your artist picture...";
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from("artist-profiles")
+        .upload(storagePath, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadError) {
+        artistStatus.textContent =
+          "Picture upload failed: " + uploadError.message;
+
+        avatarUploadButton.disabled = false;
+        avatarUploadButton.textContent = "Upload Profile Picture";
+        return;
+      }
+
+      const { data: publicData } = supabaseClient
+        .storage
+        .from("artist-profiles")
+        .getPublicUrl(storagePath);
+
+      const avatarUrl = publicData.publicUrl;
+
+      const { data: existingProfile, error: checkError } =
+        await supabaseClient
+          .from("artists")
+          .select("id")
+          .eq("id", currentArtist.id)
+          .maybeSingle();
+
+      if (checkError) {
+        artistStatus.textContent =
+          "Picture uploaded, but profile check failed: " +
+          checkError.message;
+
+        avatarUploadButton.disabled = false;
+        avatarUploadButton.textContent = "Upload Profile Picture";
+        return;
+      }
+
+      let saveResult;
+
+      if (existingProfile) {
+        saveResult = await supabaseClient
+          .from("artists")
+          .update({ avatar_url: avatarUrl })
+          .eq("id", currentArtist.id);
+      } else {
+        saveResult = await supabaseClient
+          .from("artists")
+          .insert({
+            id: currentArtist.id,
+            display_name: profileName.value.trim(),
+            bio: profileBio.value.trim(),
+            avatar_url: avatarUrl
+          });
+      }
+
+      if (saveResult.error) {
+        artistStatus.textContent =
+          "Picture uploaded, but profile update failed: " +
+          saveResult.error.message;
+      } else {
+        showAvatar(avatarUrl);
+        avatarFile.value = "";
+
+        artistStatus.textContent =
+          "Your artist profile picture was uploaded successfully!";
+      }
+
+      avatarUploadButton.disabled = false;
+      avatarUploadButton.textContent = "Upload Profile Picture";
     });
 
-    // Submit music to Shopora Music
+    // Submit music
     uploadForm.addEventListener("submit", async function(e) {
       e.preventDefault();
 
@@ -574,8 +684,7 @@
 
     // Sign out
     document.getElementById("logout-button").addEventListener(
-      "click",
-      async function() {
+      "click", async function() {
         artistStatus.textContent = "Signing out...";
 
         const { error } = await supabaseClient.auth.signOut();
@@ -589,14 +698,17 @@
         currentArtist = null;
         artistDashboard.style.display = "none";
         accountSection.style.display = "block";
+
         profileForm.reset();
+        avatarFile.value = "";
+        showAvatar(null);
 
         artistStatus.textContent =
           "You have signed out successfully.";
       }
     );
 
-    // Restore an existing session if the artist returns to the portal
+    // Restore an existing session
     async function checkExistingSession() {
       const { data, error } =
         await supabaseClient.auth.getSession();
@@ -615,3 +727,4 @@
   </script>
 </body>
 </html>
+
