@@ -234,6 +234,45 @@
       font-weight: bold;
     }
 
+    /* Artist picture beside each song */
+    .song-artist-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .song-artist-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #352a48;
+      border: 2px solid #f4c75e;
+      flex-shrink: 0;
+    }
+
+    .song-artist-placeholder {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #352a48;
+      color: #f4c75e;
+      border: 2px solid #f4c75e;
+      font-weight: bold;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .song-artist-name {
+      color: #c9c3d5;
+      font-size: 14px;
+      margin: 0 !important;
+    }
+
     /* Top Artists */
     .artist-grid {
       display: grid;
@@ -351,12 +390,7 @@
       margin-bottom: 25px;
     }
 
-    .artist-profile-button {
-      margin-top: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-    }
-
+    .artist-profile-button,
     .artist-song-button {
       margin-top: 10px;
       padding: 10px 14px;
@@ -432,7 +466,6 @@
   </div>
 </section>
 
-<!-- ARTIST PROFILE SECTION -->
 <section id="artist-profile">
   <button type="button" class="back-button" id="back-to-artists">
     ← Back to Top Artists
@@ -532,7 +565,7 @@ async function loadShoporaSongs() {
       created_at,
       play_count,
       artist_id,
-      artist:artists(display_name)
+      artist:artists(display_name, avatar_url)
     `)
     .eq("status", "approved")
     .order("created_at", { ascending: false });
@@ -570,9 +603,40 @@ function createSongCard(song) {
   const title = document.createElement("h3");
   title.textContent = song.title;
 
-  const artist = document.createElement("p");
-  artist.textContent =
+  // Artist picture and name.
+  const artistRow = document.createElement("div");
+  artistRow.className = "song-artist-row";
+
+  const artistName =
     song.artist?.display_name || "Shopora Music Artist";
+
+  if (song.artist?.avatar_url) {
+    const avatar = document.createElement("img");
+    avatar.className = "song-artist-avatar";
+    avatar.src = song.artist.avatar_url;
+    avatar.alt = artistName + " profile picture";
+    avatar.loading = "lazy";
+
+    avatar.onerror = function() {
+      const placeholder = document.createElement("div");
+      placeholder.className = "song-artist-placeholder";
+      placeholder.textContent = artistName.charAt(0).toUpperCase();
+      avatar.replaceWith(placeholder);
+    };
+
+    artistRow.appendChild(avatar);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "song-artist-placeholder";
+    placeholder.textContent = artistName.charAt(0).toUpperCase();
+    artistRow.appendChild(placeholder);
+  }
+
+  const artist = document.createElement("p");
+  artist.className = "song-artist-name";
+  artist.textContent = artistName;
+
+  artistRow.appendChild(artist);
 
   const genre = document.createElement("p");
   genre.textContent = song.genre || "Music";
@@ -582,9 +646,9 @@ function createSongCard(song) {
   plays.textContent =
     "▶ " + Number(song.play_count || 0).toLocaleString() + " plays";
 
-  card.append(title, artist, genre, plays);
+  card.append(title, artistRow, genre, plays);
 
-  // Add a profile button when the song has an artist ID.
+  // Add artist profile button.
   if (song.artist_id) {
     const profileButton = document.createElement("button");
     profileButton.type = "button";
@@ -600,7 +664,8 @@ function createSongCard(song) {
         song.artist_id,
         cachedArtist || {
           artist_id: song.artist_id,
-          display_name: song.artist?.display_name || "Shopora Music Artist"
+          display_name: artistName,
+          avatar_url: song.artist?.avatar_url || null
         }
       );
     });
@@ -886,7 +951,6 @@ async function openArtistProfile(artistId, artistData = null) {
 
   let artist = artistData;
 
-  // If artist information is not already available, request it.
   if (!artist || !artist.display_name) {
     const { data, error } = await supabaseClient
       .from("artists")
