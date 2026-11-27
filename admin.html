@@ -169,8 +169,7 @@ if (!admin) {
       });
 
     
-        
-async function loadPendingSongs() {
+    async function loadPendingSongs() {
   const songList = document.getElementById("song-list");
 
   songList.textContent = "Loading pending songs...";
@@ -204,7 +203,8 @@ async function loadPendingSongs() {
     details.textContent = song.genre + " | " + song.status;
 
     const description = document.createElement("p");
-    description.textContent = song.description || "No description provided.";
+    description.textContent =
+      song.description || "No description provided.";
 
     const audio = document.createElement("audio");
     audio.controls = true;
@@ -233,20 +233,21 @@ async function loadPendingSongs() {
 
       approveButton.disabled = true;
 
-      const { error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from("songs")
         .update({ status: "approved" })
         .eq("id", song.id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
 
-      if (error) {
-        alert("Approval failed: " + error.message);
+      if (error || !data || data.length === 0) {
+        alert("Approval failed: " + (error ? error.message : "No song was updated."));
         approveButton.disabled = false;
         return;
       }
 
       alert("Song approved successfully!");
-      loadPendingSongs();
+      await loadPendingSongs();
     });
 
     const rejectButton = document.createElement("button");
@@ -257,20 +258,21 @@ async function loadPendingSongs() {
 
       rejectButton.disabled = true;
 
-      const { error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from("songs")
         .update({ status: "rejected" })
         .eq("id", song.id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
 
-      if (error) {
-        alert("Rejection failed: " + error.message);
+      if (error || !data || data.length === 0) {
+        alert("Rejection failed: " + (error ? error.message : "No song was updated."));
         rejectButton.disabled = false;
         return;
       }
 
       alert("Song rejected.");
-      loadPendingSongs();
+      await loadPendingSongs();
     });
 
     item.appendChild(heading);
@@ -282,6 +284,7 @@ async function loadPendingSongs() {
     songList.appendChild(item);
   }
 }
+    
 
     
   </script>
