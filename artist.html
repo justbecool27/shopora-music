@@ -736,7 +736,7 @@ if (coverFile) {
       if (songError) {
         await supabaseClient.storage
           .from("shopora-music")
-          .remove([storagePath]);
+          .remove([storagePath, coverStoragePath].filter(Boolean));
 
         artistStatus.textContent =
           "Song record failed: " + songError.message;
