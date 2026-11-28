@@ -735,9 +735,7 @@ cover_path: coverStoragePath,
           
 status: "pending"
 });
-        });
-
-      if (songError) {
+     if (songError) {
         await supabaseClient.storage
           .from("shopora-music")
           .remove([storagePath, coverStoragePath].filter(Boolean));
