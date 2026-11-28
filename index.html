@@ -719,6 +719,36 @@ function createSongCard(song) {
   const card = document.createElement("div");
   card.className = "song-card";
 
+  
+  // Song cover picture.
+  const coverFrame = document.createElement("div");
+  coverFrame.style.width = "100%";
+  coverFrame.style.aspectRatio = "1 / 1";
+  coverFrame.style.marginBottom = "12px";
+  coverFrame.style.borderRadius = "12px";
+  coverFrame.style.overflow = "hidden";
+  coverFrame.style.background = "#241b32";
+
+  if (song.coverSignedUrl) {
+    const coverImage = document.createElement("img");
+    coverImage.src = song.coverSignedUrl;
+    coverImage.alt = song.title + " cover";
+    coverImage.style.width = "100%";
+    coverImage.style.height = "100%";
+    coverImage.style.objectFit = "cover";
+    coverImage.loading = "lazy";
+    coverFrame.appendChild(coverImage);
+  } else {
+    coverFrame.textContent = "♪ Shopora Music";
+    coverFrame.style.display = "flex";
+    coverFrame.style.alignItems = "center";
+    coverFrame.style.justifyContent = "center";
+    coverFrame.style.color = "#f4c75e";
+  }
+
+  card.appendChild(coverFrame);
+  
+
   const title = document.createElement("h3");
   title.textContent = song.title;
 
