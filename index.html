@@ -693,6 +693,17 @@ async function loadShoporaSongs() {
         .createSignedUrl(song.storage_path, 3600);
 
     song.signedUrl = audioError ? null : audio.signedUrl;
+        song.coverSignedUrl = null;
+
+    if (song.cover_path) {
+      const { data: cover, error: coverError } =
+        await supabaseClient.storage
+          .from("shopora-music")
+          .createSignedUrl(song.cover_path, 3600);
+
+      song.coverSignedUrl =
+        coverError ? null : cover.signedUrl;
+    }
     song.play_count = Number(song.play_count || 0);
   }
 
